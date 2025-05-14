@@ -1,10 +1,25 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import pandas as pd
+import os
+import glob
+
+# === Load latest CSV from Downloads ===
+downloads_path = r"C:\Users\ksaur\Downloads"
+csv_files = glob.glob(os.path.join(downloads_path, "*.csv"))
+
+if not csv_files:
+    raise FileNotFoundError("No CSV files found in the Downloads folder.")
+
+latest_csv = max(csv_files, key=os.path.getctime)
+print(f"📁 Loading latest file: {latest_csv}")  # For debug
 
 # Load CSV
-csv_path = r"C:\Users\ksaur\Downloads\nehru-place_all-keywords_in_2025-04-10.csv"
-df = pd.read_csv(csv_path)
+try:
+    df = pd.read_csv(latest_csv)
+except Exception as e:
+    messagebox.showerror("Error", f"Failed to load CSV file.\n{e}")
+    raise
 
 # Clean data
 df = df.dropna(subset=['Volume', 'Keyword Difficulty', 'Intent'])
@@ -15,7 +30,7 @@ df = df.dropna(subset=['Volume', 'Keyword Difficulty'])
 # Unique intents
 unique_intents = ['All'] + sorted(df['Intent'].dropna().unique().tolist())
 
-# GUI Setup
+# === GUI Setup ===
 root = tk.Tk()
 root.title("Keyword Filter + Smart Analytics")
 root.geometry("1300x850")
@@ -24,7 +39,6 @@ root.geometry("1300x850")
 filter_frame = tk.Frame(root)
 filter_frame.pack(pady=10)
 
-# Manual Filters
 tk.Label(filter_frame, text="Min Volume").grid(row=0, column=0, padx=5)
 volume_entry = tk.Entry(filter_frame, width=10)
 volume_entry.grid(row=0, column=1, padx=5)
@@ -106,7 +120,6 @@ def update_stats(filtered_df):
 def apply_filters():
     filtered = df.copy()
 
-    # Manual filters
     vol = volume_entry.get()
     kd = kd_entry.get()
     intent = intent_var.get()
@@ -136,7 +149,6 @@ def apply_filters():
         elif preset == "Evergreen Keywords (Consistent traffic)":
             filtered = filtered[filtered['Intent'].str.contains("Informational", case=False, na=False)]
 
-        # Add more logic here as needed for other presets
         elif preset == "Trending Keywords (Time-sensitive boosts)":
             pass  # Requires trend data
 

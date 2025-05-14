@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# keyword = input("Enter the Market: ").strip()
+keyword = input("Enter the Market: ").strip()
 
 def safe_get_text(driver, by, selector):
     """Safely get text from an element or return 'N/A' if not found."""
